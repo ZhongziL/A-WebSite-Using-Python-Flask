@@ -4,6 +4,7 @@ from .forms import LoginForm, RegisterForm_email
 from ..models import User
 from sqlalchemy import or_
 from .. import db
+from flask_login import login_user, logout_user, login_required
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -15,6 +16,7 @@ def login():
                                         User.email==username_email)).first()
 
         if user is not None and user.checkpassword(password):
+            login_user(user)
             flash('login success')
             return redirect(url_for('main.index'))
         else:
@@ -23,6 +25,7 @@ def login():
     else:
         return render_template('/auth/login.html', form=form)
     return render_template('/auth/login.html', form=form)
+
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -45,4 +48,12 @@ def register():
     else:
         return render_template('/auth/register.html', form=form)
     return render_template('/auth/register.html', form=form)
+
+
+@auth.route('/logout')
+@login_required
+def logout():
+    flash('logout success')
+    logout_user()
+    return redirect(url_for('auth.login'))
 

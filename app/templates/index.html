@@ -1,10 +1,9 @@
 <html>
     <title>main-page</title>
     <body>
-        {%if username%}
-        <p>Hello {{username}}</p>
-        {%else%}
-        <p>Hello Stranger</p>
-        {%endif%}
+        <p>Hello {{current_user.username}}</p>
+        <div>
+            <p><a href={{url_for('auth.logout')}}>logout</a></p>
+        </div>
     </body>
 </html>
