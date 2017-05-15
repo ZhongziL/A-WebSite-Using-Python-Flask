@@ -1,29 +1,24 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
-from wtforms.validators import InputRequired, Email, EqualTo, Length, Regexp
+from wtforms.validators import Email, EqualTo, Length, Regexp, DataRequired
 from wtforms import ValidationError
 from ..models import User
 
-class LoginForm_username(FlaskForm):
-    username = StringField('username')
-    password = StringField('password')
-    submit = SubmitField('Log In')
-
-class LoginForm_email(FlaskForm):
-    email = StringField('email', validators=[InputRequired(), Email()])
-    password = StringField('password', validators=[InputRequired()])
+class LoginForm(FlaskForm):
+    username_email = StringField('username_email', validators=[DataRequired()])
+    password = StringField('password', validators=[DataRequired()])
     submit = SubmitField('Log In')
 
 class LoginForm_telnumber(FlaskForm):
-    telnumber = StringField('telnumber', validators=[InputRequired(), Length(11), Regexp('^[1-9][0-9]*&')])
-    password = StringField('password', validators=[InputRequired()])
+    telnumber = StringField('telnumber', validators=[DataRequired(), Length(11), Regexp('^[1-9][0-9]*&')])
+    password = StringField('password', validators=[DataRequired()])
     submit = SubmitField('Log In')
 
 class RegisterForm_email(FlaskForm):
-    username = StringField('username', validators=[InputRequired()])
-    email = StringField('email', validators=[InputRequired(), Email()])
-    password = StringField('password', validators=[InputRequired()])
-    password_confirm = StringField('confirm_password', validators=[InputRequired(), EqualTo('password')])
+    username = StringField('username', validators=[DataRequired()])
+    email = StringField('email', validators=[DataRequired()])
+    password = StringField('password', validators=[DataRequired()])
+    password_confirm = StringField('confirm_password')
     submit = SubmitField('Register')
 
     def validate_username(self, field):
@@ -35,8 +30,8 @@ class RegisterForm_email(FlaskForm):
             raise ValidationError('email address has already been registered')
 
 class RegisterForm_telnumber(FlaskForm):
-    username = StringField('username', validators=[InputRequired()])
-    telnumber = StringField('telnumber', validators=[InputRequired()])
+    username = StringField('username', validators=[DataRequired()])
+    telnumber = StringField('telnumber', validators=[DataRequired()])
     submit = SubmitField('Register')
 
     def validate_username(self, field):

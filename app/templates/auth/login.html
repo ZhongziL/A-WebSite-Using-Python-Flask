@@ -1,10 +1,16 @@
 <html>
     <title>login-page</title>
     <body>
+        <!--<div>
+            {{get_flashed_messages()[0]}}
+        </div>-->
         <div>
             <form method="post">
-                <p>username</p>{{form.username}}<br>
-                <p>password</p>{{form.password}}<br>
+                {{form.csrf_token}}
+                <p>username</p>
+                {{form.username_email}}<br>
+                <p>password</p>
+                {{form.password}}<br>
                 {{form.submit}}<br>
             </form>
         </div>

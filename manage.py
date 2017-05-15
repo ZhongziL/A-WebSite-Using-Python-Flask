@@ -9,7 +9,7 @@ migrate = Migrate(app, db)
 
 '''add command python manage.py shell'''
 def make_shell_context():
-    return dict(app=app, User=User)
+    return dict(app=app, db=db, User=User)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
 

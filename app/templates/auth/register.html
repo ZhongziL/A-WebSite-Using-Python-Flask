@@ -2,11 +2,14 @@
     <title>register-page</title>
     <body>
         <div>
-            <p>username</p> {{form.username}}<br>
-            <p>email</p>{{form.email}}<br>
-            <p>password</p>{{form.password}}<br>
-            <p>password_again</p>{{form.password_confirm}}<br>
-            {{form.submit}}<br>
+            <form method="post">
+                {{form.csrf_token}}
+                <p>username</p> {{form.username}}<br>
+                <p>email</p>{{form.email}}<br>
+                <p>password</p>{{form.password}}<br>
+                <p>password_again</p>{{form.password_confirm}}<br>
+                {{form.submit}}<br>
+            </form>
         </div>
     </body>
 </html>
