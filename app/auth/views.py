@@ -1,10 +1,11 @@
 from . import auth
-from flask import url_for, render_template, redirect, flash, request
+from flask import url_for, render_template, redirect, flash
 from .forms import LoginForm, RegisterForm_email
 from ..models import User
 from sqlalchemy import or_
 from .. import db
 from flask_login import login_user, logout_user, login_required
+from ..email import send_mail
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -39,6 +40,7 @@ def register():
 
         if user is None:
             u = User(username=username, email=email, password=password)
+            send_mail(email, username, 'fuck')
             db.session.add(u)
             flash('register success')
             return redirect(url_for('auth.login'))
