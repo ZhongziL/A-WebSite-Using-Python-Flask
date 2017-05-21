@@ -1,5 +1,5 @@
 from . import auth
-from flask import url_for, render_template, redirect, flash
+from flask import url_for, render_template, redirect, flash, request
 from .forms import LoginForm, RegisterForm_email
 from ..models import User
 from sqlalchemy import or_
@@ -19,7 +19,7 @@ def login():
         if user is not None and user.checkpassword(password):
             login_user(user)
             flash('login success')
-            return redirect(url_for('main.index'))
+            return redirect(request.args.get('next') or url_for('main.index'))
         else:
             flash('username or password error')
             return render_template('/auth/login.html', form=form)

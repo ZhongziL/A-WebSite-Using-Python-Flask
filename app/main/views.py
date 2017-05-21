@@ -1,5 +1,5 @@
 from . import main
-from flask import render_template, redirect, url_for
+from flask import render_template, abort
 from flask_login import login_required
 from ..models import User
 
@@ -12,5 +12,5 @@ def index():
 def user(name):
     user = User.query.filter_by(username=name).first()
     if user is None:
-        return redirect(url_for('auth.login'))
+        abort(404)
     return render_template('profile.html', user=user)
