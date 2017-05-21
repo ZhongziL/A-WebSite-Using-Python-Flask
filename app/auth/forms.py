@@ -41,3 +41,9 @@ class RegisterForm_telnumber(FlaskForm):
     def validate_telnumber(self, field):
         if User.query.filter_by(telnumber=field.data).first():
             raise ValidationError('telnumber has already been registered')
+
+class ChangePasswordForm(FlaskForm):
+    oldpassword = StringField('oldpassword', validators=[DataRequired()]);
+    newpassword = StringField('newpassword', validators=[DataRequired()]);
+    password_again = StringField('password_again', validators=[DataRequired()]);
+    submit = SubmitField('Change Confirm');

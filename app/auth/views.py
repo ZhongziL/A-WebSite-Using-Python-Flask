@@ -1,10 +1,10 @@
 from . import auth
 from flask import url_for, render_template, redirect, flash, request
-from .forms import LoginForm, RegisterForm_email
+from .forms import LoginForm, RegisterForm_email, ChangePasswordForm
 from ..models import User
 from sqlalchemy import or_
 from .. import db
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from ..email import send_mail
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -58,4 +58,21 @@ def logout():
     flash('logout success')
     logout_user()
     return redirect(url_for('auth.login'))
+
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        old_password = form.oldpassword.data
+        if current_user.checkpassword(old_password):
+            current_user.password = form.newpassword.data
+            db.session.add(current_user)
+            flash('password changed')
+            return redirect(url_for('main.index'))
+        flash('password error')
+        return render_template('/auth/changepassword.html', form=form)
+    return render_template('/auth/changepassword.html', form=form)
+
 
