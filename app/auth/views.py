@@ -1,6 +1,6 @@
 from . import auth
 from flask import url_for, render_template, redirect, flash, request
-from .forms import LoginForm, RegisterForm_email, ChangePasswordForm
+from .forms import LoginForm, RegisterForm_email, ChangePasswordForm, EditProfileForm
 from ..models import User
 from sqlalchemy import or_
 from .. import db
@@ -75,4 +75,16 @@ def change_password():
         return render_template('/auth/changepassword.html', form=form)
     return render_template('/auth/changepassword.html', form=form)
 
+@auth.route('/edit-password', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        user_detail = form.user_detail.data
+        current_user.user_detail = user_detail
+        db.session.add(current_user)
+        flash('profile edit success')
+        return redirect(url_for('main.user', name=current_user.username))
+    form.user_detail.data = current_user.user_detail
+    return render_template('/auth/edit_profile.html', form=form)
 

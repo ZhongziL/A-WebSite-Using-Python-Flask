@@ -43,7 +43,12 @@ class RegisterForm_telnumber(FlaskForm):
             raise ValidationError('telnumber has already been registered')
 
 class ChangePasswordForm(FlaskForm):
-    oldpassword = StringField('oldpassword', validators=[DataRequired()]);
-    newpassword = StringField('newpassword', validators=[DataRequired()]);
-    password_again = StringField('password_again', validators=[DataRequired()]);
-    submit = SubmitField('Change Confirm');
+    oldpassword = StringField('oldpassword', validators=[DataRequired()])
+    newpassword = StringField('newpassword', validators=[DataRequired()])
+    password_again = StringField('password_again', validators=[DataRequired()])
+    submit = SubmitField('Change Confirm')
+
+
+class EditProfileForm(FlaskForm):
+    user_detail = StringField('userdetail')
+    submit = SubmitField('Confirm')
