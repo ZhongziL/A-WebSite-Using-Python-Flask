@@ -10,6 +10,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     telnumber = db.Column(db.String(16))
     user_detail = db.Column(db.Text())
+    confirmed = db.Column(db.Boolean, default=False)
 
     @property
     def password(self):
