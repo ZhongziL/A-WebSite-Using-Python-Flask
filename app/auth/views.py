@@ -13,7 +13,9 @@ def before():
         if not current_user.confirmed \
                 and request.endpoint != 'main.index' \
                 and request.endpoint != 'auth.unconfirmed' \
-                and request.endpoint != 'auth.logout':
+                and request.endpoint != 'auth.logout' \
+                and request.endpoint != 'auth.confirm' \
+                and request.endpoint != 'auth.resend_confirm':
             return redirect(url_for('auth.unconfirmed'))
 
 @auth.route('/unconfirmed')
@@ -56,7 +58,8 @@ def register():
 
         if user is None:
             u = User(username=username, email=email, password=password)
-            send_mail(email, username, 'fuck')
+            token = u.generation_confirmation_token()
+            send_mail(email, username, 'email_to_client', token=token, username=u.username)
             db.session.add(u)
             flash('register success')
             return redirect(url_for('auth.login'))
@@ -103,4 +106,25 @@ def edit_profile():
         return redirect(url_for('main.user', name=current_user.username))
     form.user_detail.data = current_user.user_detail
     return render_template('/auth/edit_profile.html', form=form)
+
+@auth.route('/confirm/<token>')
+@login_required
+def confirm(token):
+    if current_user.confirmed:
+        return redirect(url_for('main.index'))
+    if current_user.confirm(token):
+        flash('confirmed success')
+    else:
+        flash('error')
+    return redirect(url_for('main.index'))
+
+
+@auth.route('/confirm')
+@login_required
+def resend_confirm():
+    token = current_user.generation_confirmation_token()
+    send_mail(current_user.email, current_user.username,
+              'email_to_client', token=token, username=current_user.username)
+    flash('resend')
+    return redirect(url_for('auth.unconfirmed'))
 
