@@ -1,15 +1,20 @@
 from . import auth
 from flask import url_for, render_template, redirect, flash, request
 from .forms import LoginForm, RegisterForm_email, ChangePasswordForm, EditProfileForm
+from .forms import ChangeEmailForm, ResetPasswordForm, ResetForm
 from ..models import User
 from sqlalchemy import or_
 from .. import db
 from flask_login import login_user, logout_user, login_required, current_user
 from ..email import send_mail
 
+
 @auth.before_app_request
 def before():
     if current_user.is_authenticated:
+        if request.endpoint == 'auth.login':
+            flash('please logout first')
+            return redirect(url_for('main.index'))
         if not current_user.confirmed \
                 and request.endpoint != 'main.index' \
                 and request.endpoint != 'auth.unconfirmed' \
@@ -17,6 +22,7 @@ def before():
                 and request.endpoint != 'auth.confirm' \
                 and request.endpoint != 'auth.resend_confirm':
             return redirect(url_for('auth.unconfirmed'))
+
 
 @auth.route('/unconfirmed')
 def unconfirmed():
@@ -31,8 +37,8 @@ def login():
     if form.validate_on_submit():
         username_email = form.username_email.data
         password = form.password.data
-        user = User.query.filter(or_(User.username==username_email,
-                                        User.email==username_email)).first()
+        user = User.query.filter(or_(User.username == username_email,
+                                    User.email == username_email)).first()
 
         if user is not None and user.checkpassword(password):
             login_user(user)
@@ -43,7 +49,6 @@ def login():
             return render_template('/auth/login.html', form=form)
     else:
         return render_template('/auth/login.html', form=form)
-    return render_template('/auth/login.html', form=form)
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -54,7 +59,7 @@ def register():
         password = form.password.data
         email = form.email.data
 
-        user = User.query.filter(or_(username=='username', email=='email')).first()
+        user = User.query.filter(or_(User.username == username, User.email == email)).first()
 
         if user is None:
             u = User(username=username, email=email, password=password)
@@ -68,7 +73,6 @@ def register():
             return render_template('/auth/register.html', form=form)
     else:
         return render_template('/auth/register.html', form=form)
-    return render_template('/auth/register.html', form=form)
 
 
 @auth.route('/logout')
@@ -94,7 +98,8 @@ def change_password():
         return render_template('/auth/changepassword.html', form=form)
     return render_template('/auth/changepassword.html', form=form)
 
-@auth.route('/edit-password', methods=['GET', 'POST'])
+
+@auth.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     form = EditProfileForm()
@@ -106,6 +111,7 @@ def edit_profile():
         return redirect(url_for('main.user', name=current_user.username))
     form.user_detail.data = current_user.user_detail
     return render_template('/auth/edit_profile.html', form=form)
+
 
 @auth.route('/confirm/<token>')
 @login_required
@@ -128,3 +134,53 @@ def resend_confirm():
     flash('resend')
     return redirect(url_for('auth.unconfirmed'))
 
+
+@auth.route('/change-email', methods=['GET', 'POST'])
+@login_required
+def change_email():
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        if current_user.checkpassword(form.password.data):
+            current_user.email = form.new_email.data
+            current_user.confirmed = False
+            token = current_user.generation_confirmation_token()
+            send_mail(current_user.email, current_user.username,
+                      'email_to_client', token=token, username=current_user.username)
+            db.session.add(current_user)
+            flash('your email has already been changed')
+            return redirect(url_for('auth.unconfirmed'))
+        flash('password error')
+        return render_template('/auth/change_email.html', form=form)
+    return render_template('/auth/change_email.html', form=form)
+
+
+@auth.route('/reset', methods=['GET', 'POST'])
+def reset_password():
+    form = ResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None:
+            token = user.generation_reset_token()
+            send_mail(form.email.data, user.username,
+                      'email_to_reset', token=token, username=user.username)
+            flash('send email')
+            return redirect(url_for('auth.login'))
+        flash('email is not exist')
+        return render_template('/auth/reset_password.html', form=form)
+    return render_template('/auth/reset_password.html', form=form)
+
+
+@auth.route('/reset/<token>', methods=['GET', 'POST'])
+def reset_confirm(token):
+    email = User.reset_password(token)
+    form = ResetPasswordForm()
+    user = User.query.filter_by(email=email).first()
+    if form.validate_on_submit() and user is not None and email is not None:
+        user.password = form.newpassword.data
+        db.session.add(user)
+        flash('reset success')
+        return redirect(url_for('auth.login'))
+    if user is None or email is None:
+        flash('error, please try again')
+        return redirect(url_for('auth.reset_password'))
+    return render_template('/auth/password_reset.html', form=form, email=email)

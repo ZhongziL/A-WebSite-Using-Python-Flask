@@ -52,3 +52,20 @@ class ChangePasswordForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     user_detail = StringField('userdetail')
     submit = SubmitField('Confirm')
+
+
+class ChangeEmailForm(FlaskForm):
+    new_email = StringField('email', validators=[DataRequired()])
+    password = StringField('password', validators=[DataRequired()])
+    submit = SubmitField('Change Email')
+
+
+class ResetForm(FlaskForm):
+    email = StringField('email', validators=[DataRequired()])
+    submit = SubmitField('Reset Password')
+
+
+class ResetPasswordForm(FlaskForm):
+    newpassword = StringField('newpassword', validators=[DataRequired()])
+    password_again = StringField('password_again', validators=[DataRequired()])
+    submit = SubmitField('Change Confirm')

@@ -41,6 +41,19 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    def generation_reset_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'email':self.email})
+
+    @staticmethod
+    def reset_password(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return data.get('email')
+
     def __repr__(self):
         return '<User %r>' % self.username
 
