@@ -1,10 +1,14 @@
 <html>
-    <title>edit-profile</title>
+    <title>edit-profile-admin</title>
 
     <body>
         <div>
             <form method="post">
                 {{form.csrf_token}}
+                <p>username: {{form.username}}</p>
+                <p>email: {{form.email}}</p>
+                <p>telnumber: {{form.telnumber}}</p>
+                <p>confirmed: {{form.confirmed}}</p>
                 <p>user_detail: {{form.user_detail}}</p>
                 {{form.submit}}
             </form>

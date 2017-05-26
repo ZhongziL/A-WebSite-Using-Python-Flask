@@ -13,7 +13,12 @@
             {%if current_user == user%}
             <p><a href={{url_for('auth.edit_profile')}}>edit profile</a></p>
             {% endif %}
+
+            {% if current_user.is_administrator %}
+            <p><a href={{url_for('auth.edit_profile_admin', id=user.id)}}>admin_edit</a></p>
+            {% endif %}
+
             <p><a href={{url_for('main.index')}}>back</a></p>
-        </div
+        </div>
     </body>
 </html>

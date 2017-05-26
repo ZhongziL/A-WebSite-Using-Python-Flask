@@ -1,12 +1,13 @@
 from . import auth
 from flask import url_for, render_template, redirect, flash, request
 from .forms import LoginForm, RegisterForm_email, ChangePasswordForm, EditProfileForm
-from .forms import ChangeEmailForm, ResetPasswordForm, ResetForm
+from .forms import ChangeEmailForm, ResetPasswordForm, ResetForm, EditProfileAdminForm
 from ..models import User
 from sqlalchemy import or_
 from .. import db
 from flask_login import login_user, logout_user, login_required, current_user
 from ..email import send_mail
+from ..decorator import admin_required
 
 
 @auth.before_app_request
@@ -111,7 +112,7 @@ def edit_profile():
         flash('profile edit success')
         return redirect(url_for('main.user', name=current_user.username))
     form.user_detail.data = current_user.user_detail
-    return render_template('/auth/edit_profile.html', form=form)
+    return render_template('/auth/edit_profile.html', form=form, user=current_user)
 
 
 @auth.route('/confirm/<token>')
@@ -185,3 +186,27 @@ def reset_confirm(token):
         flash('error, please try again')
         return redirect(url_for('auth.reset_password'))
     return render_template('/auth/password_reset.html', form=form, email=email)
+
+
+@auth.route('/edit_profile_admin/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_profile_admin(id):
+    user = User.query.get_or_404(id)
+    form = EditProfileAdminForm()
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.email = form.email.data
+        user.confirmed = form.confirmed.data
+        user.telnumber = form.telnumber.data
+        user.user_detail = form.user_detail.data
+        db.session.add(user)
+        flash('edit success')
+        return redirect(url_for('main.user', user=user))
+    form.username.data = user.username
+    form.email.data = user.email
+    form.confirmed.data = user.confirmed
+    form.telnumber.data = user.telnumber.data
+    form.user_detail.data = user.user_detail
+    return render_template('/auth/edit_profile_admin.html', form=form, user=user)
+
