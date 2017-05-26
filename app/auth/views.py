@@ -12,6 +12,7 @@ from ..email import send_mail
 @auth.before_app_request
 def before():
     if current_user.is_authenticated:
+        current_user.ping()
         if request.endpoint == 'auth.login':
             flash('please logout first')
             return redirect(url_for('main.index'))
