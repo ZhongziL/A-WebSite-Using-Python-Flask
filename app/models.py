@@ -17,7 +17,7 @@ class Permission:
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.COlumn(db.String(64), unique=True)
+    name = db.Column(db.String(64), unique=True)
     default = db.Column(db.Boolean(), default=False, index=True)
     permissions = db.Column(db.Integer)
     users = db.relationship('User', backref='role', lazy='dynamic')
@@ -55,7 +55,7 @@ class User(UserMixin, db.Model):
     member_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
     confirmed = db.Column(db.Boolean, default=False)
-    role_id = db.Column(db.Integer, db.Foreignkey('roles.id'))
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
