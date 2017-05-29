@@ -210,7 +210,7 @@ def edit_profile_admin(id):
     form.username.data = user.username
     form.email.data = user.email
     form.confirmed.data = user.confirmed
-    form.telnumber.data = user.telnumber.data
+    form.telnumber.data = user.telnumber
     form.user_detail.data = user.user_detail
     return render_template('/auth/edit_profile_admin.html', form=form, user=user)
 

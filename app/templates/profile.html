@@ -14,7 +14,7 @@
             <p><a href={{url_for('auth.edit_profile')}}>edit profile</a></p>
             {% endif %}
 
-            {% if current_user.is_administrator %}
+            {% if current_user.is_administrator() %}
             <p><a href={{url_for('auth.edit_profile_admin', id=user.id)}}>admin_edit</a></p>
             {% endif %}
 
