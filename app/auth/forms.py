@@ -32,6 +32,10 @@ class RegisterForm_email(FlaskForm):
 class RegisterForm_telnumber(FlaskForm):
     username = StringField('username', validators=[DataRequired()])
     telnumber = StringField('telnumber', validators=[DataRequired()])
+    password = StringField('password', validators=[DataRequired()])
+    password_confirm = StringField('confirm_password')
+    send = SubmitField('Send Message')
+    validatecode = StringField('code', validators=[DataRequired()])
     submit = SubmitField('Register')
 
     def validate_username(self, field):

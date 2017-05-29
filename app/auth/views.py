@@ -1,13 +1,16 @@
 from . import auth
-from flask import url_for, render_template, redirect, flash, request
+from flask import url_for, render_template, redirect, flash, request, session
 from .forms import LoginForm, RegisterForm_email, ChangePasswordForm, EditProfileForm
 from .forms import ChangeEmailForm, ResetPasswordForm, ResetForm, EditProfileAdminForm
+from .forms import LoginForm_telnumber, RegisterForm_telnumber
 from ..models import User
 from sqlalchemy import or_
 from .. import db
 from flask_login import login_user, logout_user, login_required, current_user
 from ..email import send_mail
 from ..decorator import admin_required
+from ..sms import send_out
+import random
 
 
 @auth.before_app_request
@@ -40,7 +43,8 @@ def login():
         username_email = form.username_email.data
         password = form.password.data
         user = User.query.filter(or_(User.username == username_email,
-                                    User.email == username_email)).first()
+                                    User.email == username_email,
+                                     User.telnumber == username_email)).first()
 
         if user is not None and user.checkpassword(password):
             login_user(user)
@@ -210,3 +214,25 @@ def edit_profile_admin(id):
     form.user_detail.data = user.user_detail
     return render_template('/auth/edit_profile_admin.html', form=form, user=user)
 
+
+@auth.route('/register_by_telnumber', methods=['GET','POST'])
+def register_by_tel():
+    form = RegisterForm_telnumber()
+    if request.method == 'POST':
+        if 'send' in request.form:
+            code = random.randint(1000,9999)
+            text = str(code)
+            session['code'] = text
+            print(text)
+            mobile = form.telnumber.data
+            send_out(text, mobile)
+            return render_template('/auth/register_by_tel.html', form=form)
+        elif 'submit' in request.form:
+            if form.validatecode.data == session['code']:
+                user = User(username=form.username.data, telnumber=form.telnumber.data,
+                            password=form.password.data, confirmed=True)
+                db.session.add(user)
+                return redirect(url_for('auth.login'))
+            return render_template('/auth/register_by_tel.html', form=form)
+        return render_template('/auth/register_by_tel.html', form=form)
+    return render_template('/auth/register_by_tel.html', form=form)
