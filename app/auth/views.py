@@ -80,7 +80,7 @@ def register():
             elif 'submit' in request.form:
                 if form.code.data == session['code']:
                     user = User(username=form.username.data, telnumber=form.telnumber.data,
-                                password=form.password.data, confirmed=True)
+                           password=form.password.data, confirmed=True)
                     db.session.add(user)
                     return redirect(url_for('auth.login'))
                 return render_template('/auth/signup.html', form=form, checked=checked)
