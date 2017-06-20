@@ -68,7 +68,7 @@ def register():
     form = RegisterForm()
     if request.method == 'POST':
         if(request.values.get('by') == 'Phone'):
-            checked = ['checked', ' ']
+            checked = ["checked", " "]
             if 'send' in request.form:
                 code = random.randint(1000, 9999)
                 text = str(code)
@@ -85,7 +85,7 @@ def register():
                     return redirect(url_for('auth.login'))
                 return render_template('/auth/signup.html', form=form, checked=checked)
         else:
-            checked = [' ', 'checked']
+            checked = [" ", "checked"]
             username = form.username.data
             password = form.password.data
             email = form.email.data
@@ -104,7 +104,7 @@ def register():
                 flash('username or email is already existed')
                 return render_template('/auth/signup.html', form=form, checked=checked)
     else:
-        return render_template('/auth/signup.html', form=form, checked = ['checked',' '])
+        return render_template('/auth/signup.html', form=form, checked = ["checked", " "])
 
 
 @auth.route('/logout')

@@ -18,9 +18,10 @@ $(function () {
 });
 
 window.onload = function() {
-    var isPhoneChecked = $("input[name='byPhone']:checked").val();
-    alert(isPhoneChecked);
-    if (isPhoneChecked == "") {
+    //var isPhoneChecked = $("input[name='byPhone']:checked").val();
+    var isPhoneChecked = $("#byPhone").attr('checked')
+    //alert(isPhoneChecked);
+    if (isPhoneChecked == "checked") {
         //$('#byEmail').attr('checked', false);
         $('#phoneMethod').css("display", "block");
         $('#emailMethod').css("display", "none");
