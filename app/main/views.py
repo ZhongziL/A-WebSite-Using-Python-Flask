@@ -1,5 +1,5 @@
 from . import main
-from flask import render_template, abort, request, redirect, url_for
+from flask import render_template, abort, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from ..models import User, Permission, Post, Comment
 from .forms import PostForm, CommentForm
@@ -17,15 +17,16 @@ def index():
         picSrc = current_user.avatar_url
     else:
         picSrc = "avatar/head.png"
-    page = request.args.get('page', 1, type=int)
-    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(page, per_page=20, error_out=False)
-    posts = pagination.items
+    # page = request.args.get('page', 1, type=int)
+    # pagination = Post.query.order_by(Post.timestamp.desc()).paginate(page, per_page=20, error_out=False)
+    # posts = pagination.items
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
     number = Post.query.count()
     if number > 5:
         onshows = posts[:4]
     else:
         onshows = posts
-    return render_template('main/index.html', posts=posts, pagination=pagination,
+    return render_template('main/index.html', posts=posts,
                            onshows=onshows, username=current_user.username, picSrc=picSrc)
 
 
@@ -35,11 +36,19 @@ def user(name):
     u = User.query.filter_by(username=name).first()
     if u is None:
         abort(404)
-    '''posts = u.posts.order_by(Post.timestamp.desc()).all()'''
-    page = request.args.get('page', 1, type=int)
-    pagination = u.posts.order_by(Post.timestamp.desc()).paginate(page, per_page=20, error_out=False)
-    posts = pagination.items
-    return render_template('profile.html', user=u, posts=posts, pagination=pagination)
+    posts = u.posts.order_by(Post.timestamp.desc()).all()
+    answers = u.comments.order_by(Comment.timestamp.desc()).all()
+    list = []
+    for answer in answers:
+        p = Post.query.filter_by(id=answer.post_id).first()
+        list.append(p)
+    # page = request.args.get('page', 1, type=int)
+    # pagination = u.posts.order_by(Post.timestamp.desc()).paginate(page, per_page=20, error_out=False)
+    # posts = pagination.items
+    followeds = u.followed.all()
+    followers = u.followers.all()
+    return render_template('profile.html', user=u, articles=posts, answers=list,cuser=current_user,
+                           followeds=followeds, followers=followers)
 
 
 @main.route('/writeEssay', methods=['GET','POST'])
@@ -100,3 +109,23 @@ def addComment(id):
     comment.good_count = comment.good_count+1
     db.session.add(comment)
     return redirect(url_for('main.question', id=comment.post_id))
+
+
+@main.route('/follow/<username>')
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is not None:
+        current_user.follow(user)
+        db.session.add(current_user)
+    return redirect(url_for('main.user', name=username))
+
+
+@main.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is not None:
+        current_user.unfollow(user)
+        db.session.add(current_user)
+    return redirect(url_for('main.user', name=username))
